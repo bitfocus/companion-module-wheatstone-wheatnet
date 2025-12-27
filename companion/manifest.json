@@ -1,6 +1,6 @@
 {
-	"id": "companion-module-wheatstone-wheatnet",
-	"name": "companion-module-wheatstone-wheatnet",
+	"id": "wheatstone-wheatnet",
+	"name": "Wheatstone WheatNet IP",
 	"shortname": "wheatstone-wheatnet",
 	"description": "communicate with Wheatstone I/O Blades using TCP connection.",
 	"version": "0.0.0",
@@ -21,6 +21,6 @@
 	},
 	"legacyIds": [],
 	"manufacturer": "Wheatstone",
-	"products": ["Wheatnet IP"],
+	"products": ["WheatNet IP"],
 	"keywords": ["ACI", "Blade", "UMIX", "IP-88a", "IP-88d", "IP-88ad", "IP-88e"]
 }

@@ -1,24 +1,19 @@
 import type { ModuleInstance } from './main.js'
+import {
+	umixInputOptions,
+	umixInputDbOptions,
+	umixInputDeltaOptions,
+	umixInputDuckOptions,
+	umixInputBalanceOptions,
+	umixInputRampOptions,
+	umixOutputOptions,
+	umixOutputDbOptions,
+	umixOutputDeltaOptions,
+	ioOptions,
+} from './options.js'
 
 export function UpdateActions(self: ModuleInstance): void {
 	self.setActionDefinitions({
-		sample_action: {
-			name: 'My First Action',
-			options: [
-				{
-					id: 'num',
-					type: 'number',
-					label: 'Test',
-					default: 5,
-					min: 0,
-					max: 100,
-				},
-			],
-			callback: async (event) => {
-				console.log('Hello world!', event.options.num)
-			},
-		},
-
 		/* =========================
 		 * SYS
 		 * ========================= */
@@ -246,179 +241,3 @@ export function UpdateActions(self: ModuleInstance): void {
 		},
 	})
 }
-
-import {
-	CompanionInputFieldDropdown,
-	CompanionInputFieldTextInput,
-	CompanionInputFieldNumber,
-} from '@companion-module/base'
-
-const umixInputOptions = (): (CompanionInputFieldNumber | CompanionInputFieldDropdown)[] => [
-	{ type: 'number', id: 'mixer', label: 'Mixer', min: 1, max: 2, default: 1 },
-	{ type: 'number', id: 'channel', label: 'Channel', min: 1, max: 8, default: 1 },
-	{
-		type: 'dropdown',
-		id: 'value',
-		label: 'Value',
-		default: 1,
-		choices: [
-			{ id: 1, label: 'On' },
-			{ id: 0, label: 'Off' },
-		],
-	},
-]
-
-const umixInputDbOptions = (): CompanionInputFieldNumber[] => [
-	{ type: 'number', id: 'mixer', label: 'Mixer', default: 1, min: 1, max: 2 },
-	{ type: 'number', id: 'channel', label: 'Channel', default: 1, min: 1, max: 8 },
-	{ type: 'number', id: 'db', label: 'dB', min: -80, max: 12, default: 0 },
-]
-
-const umixInputDeltaOptions = (): CompanionInputFieldNumber[] => [
-	{ type: 'number', id: 'mixer', label: 'Mixer', default: 1, min: 1, max: 2 },
-	{ type: 'number', id: 'channel', label: 'Channel', default: 1, min: 1, max: 8 },
-	{ type: 'number', id: 'delta', label: 'Δ dB', min: -80, max: 80, default: 1 },
-]
-
-const umixInputDuckOptions = (): (CompanionInputFieldNumber | CompanionInputFieldDropdown)[] => [
-	{ type: 'number', id: 'mixer', label: 'Mixer', default: 1, min: 1, max: 2 },
-	{ type: 'number', id: 'channel', label: 'Channel', default: 1, min: 1, max: 8 },
-	{
-		type: 'dropdown',
-		id: 'output',
-		label: 'Output',
-		default: 'DUCKA',
-		choices: [
-			{ id: 'DUCKA', label: 'A' },
-			{ id: 'DUCKB', label: 'B' },
-		],
-	},
-	{
-		type: 'dropdown',
-		id: 'value',
-		label: 'Value',
-		default: 1,
-		choices: [
-			{ id: 1, label: 'On' },
-			{ id: 0, label: 'Off' },
-		],
-	},
-]
-
-const umixInputBalanceOptions = (): (CompanionInputFieldNumber | CompanionInputFieldDropdown)[] => [
-	{ type: 'number', id: 'mixer', label: 'Mixer', default: 1, min: 1, max: 2 },
-	{ type: 'number', id: 'channel', label: 'Channel', default: 1, min: 1, max: 8 },
-	{
-		type: 'dropdown',
-		id: 'output',
-		label: 'Output',
-		default: 'BALA',
-		choices: [
-			{ id: 'BALA', label: 'A' },
-			{ id: 'BALB', label: 'B' },
-		],
-	},
-	{ type: 'number', id: 'percent', label: 'Percent', min: -100, max: 100, default: 0 },
-]
-
-const umixInputRampOptions = (): (CompanionInputFieldNumber | CompanionInputFieldDropdown)[] => [
-	{ type: 'number', id: 'mixer', label: 'Mixer', default: 1, min: 1, max: 2 },
-	{ type: 'number', id: 'channel', label: 'Channel', default: 1, min: 1, max: 8 },
-	{
-		type: 'dropdown',
-		id: 'type',
-		label: 'Ramp Type',
-		default: 'URAMPA',
-		choices: [
-			{ id: 'URAMPA', label: 'Up A' },
-			{ id: 'DRAMPA', label: 'Down A' },
-			{ id: 'URAMPB', label: 'Up B' },
-			{ id: 'DRAMPB', label: 'Down B' },
-		],
-	},
-	{
-		type: 'dropdown',
-		id: 'speed',
-		label: 'Speed',
-		default: 1,
-		choices: [
-			{ id: 0, label: 'Off' },
-			{ id: 1, label: 'Fast' },
-			{ id: 2, label: 'Medium' },
-			{ id: 3, label: 'Slow' },
-		],
-	},
-]
-
-const umixOutputOptions = (): (CompanionInputFieldNumber | CompanionInputFieldDropdown)[] => [
-	{ type: 'number', id: 'mixer', label: 'Mixer', default: 1, min: 1, max: 2 },
-	{
-		type: 'dropdown',
-		id: 'bus',
-		label: 'Bus',
-		default: 'A',
-		choices: [
-			{ id: 'A', label: 'A' },
-			{ id: 'B', label: 'B' },
-		],
-	},
-	{
-		type: 'dropdown',
-		id: 'value',
-		label: 'Value',
-		default: 1,
-		choices: [
-			{ id: 1, label: 'On' },
-			{ id: 0, label: 'Off' },
-		],
-	},
-]
-
-const umixOutputDbOptions = (): (CompanionInputFieldNumber | CompanionInputFieldDropdown)[] => [
-	{ type: 'number', id: 'mixer', label: 'Mixer', default: 1, min: 1, max: 2 },
-	{
-		type: 'dropdown',
-		id: 'bus',
-		label: 'Bus',
-		default: 'A',
-		choices: [
-			{ id: 'A', label: 'A' },
-			{ id: 'B', label: 'B' },
-		],
-	},
-	{ type: 'number', id: 'db', label: 'dB', min: -80, max: 0, default: 0.0 },
-]
-
-const umixOutputDeltaOptions = (): (CompanionInputFieldNumber | CompanionInputFieldDropdown)[] => [
-	{ type: 'number', id: 'mixer', label: 'Mixer', default: 1, min: 1, max: 2 },
-	{
-		type: 'dropdown',
-		id: 'bus',
-		label: 'Bus',
-		default: 'A',
-		choices: [
-			{ id: 'A', label: 'A' },
-			{ id: 'B', label: 'B' },
-		],
-	},
-	{ type: 'number', id: 'delta', label: 'Δ dB', min: -80, max: 80, default: 0.0 },
-]
-
-const ioOptions = (): (CompanionInputFieldTextInput | CompanionInputFieldDropdown)[] => [
-	{
-		type: 'textinput',
-		id: 'index',
-		label: 'Index',
-		tooltip: 'Index on card 0 or CARD.CIRCUIT ie. 49.0 for card 49 circuit 0',
-	},
-	{
-		type: 'dropdown',
-		id: 'value',
-		label: 'Level',
-		default: 1,
-		choices: [
-			{ id: 1, label: 'High' },
-			{ id: 0, label: 'Low' },
-		],
-	},
-]

@@ -31,7 +31,7 @@ interface UmixState {
 	//minc?: number
 	//inca?: number
 	//incb?: number
-	[key: string]: string | undefined
+	[key: string]: string | number | undefined
 }
 
 interface ModuleState {
@@ -40,7 +40,7 @@ interface ModuleState {
 
 export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	config!: ModuleConfig // Setup in init()
-	declare state: ModuleState
+	state: ModuleState = { umix: {} }
 	socket!: TCPHelper
 	socketBuffer: string = ''
 
@@ -187,7 +187,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		}
 	}
 
-	// Subscribe to UMix parameter updates
+	// Subscribe to UMiX parameter updates
 	// Send <UMIXSUB:1.2|ON:1>
 	// Response <OK>
 	// ON
@@ -196,16 +196,16 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	// MFDR
 	// DUCKA
 	// DUCKB
-	async subscribeUmix(channel: string, parameter: string): Promise<void> {
-		const cmd = `<UMIXSUB:${channel}|${parameter}:1>`
+	async subscribeUmix(mixer: number, channel: string, parameter: string): Promise<void> {
+		const cmd = `<UMIXSUB:${mixer}.${channel}|${parameter}:1>`
 		await this.send(cmd)
 	}
 
-	// Unsubscribe from UMix parameter updates
+	// Unsubscribe from UMiX parameter updates
 	// Send <UMIXSUB:1.2|ON:0>
 	// Response <OK>
-	async unsubscribeUmix(channel: string, parameter: string): Promise<void> {
-		const cmd = `<UMIXSUB:${channel}|${parameter}:0>`
+	async unsubscribeUmix(mixer: number, channel: string, parameter: string): Promise<void> {
+		const cmd = `<UMIXSUB:${mixer}.${channel}|${parameter}:0>`
 		await this.send(cmd)
 	}
 

@@ -1,3 +1,3 @@
-## [Wheatstone Wheatnet IP]
+## [Wheatstone WheatNet IP]
 
 Write some help for your users here!
