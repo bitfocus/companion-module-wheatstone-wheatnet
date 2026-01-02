@@ -3,7 +3,7 @@ import { Regex, type SomeCompanionConfigField } from '@companion-module/base'
 export interface ModuleConfig {
 	host: string
 	port: number
-	pollInterval: number
+	heartbeatInterval: number
 	debugLogging: boolean
 }
 
@@ -27,13 +27,13 @@ export function GetConfigFields(): SomeCompanionConfigField[] {
 		},
 		{
 			type: 'number',
-			id: 'pollInterval',
-			label: 'Polling interval (ms, 0 = disabled)',
+			id: 'heartbeatInterval',
+			label: 'Heartbeat interval (in seconds, 120 = maximum)',
 			width: 6,
-			default: 0,
+			default: 30,
 			min: 0,
-			max: 10000,
-			step: 100,
+			max: 120,
+			step: 1,
 		},
 		{
 			type: 'checkbox',

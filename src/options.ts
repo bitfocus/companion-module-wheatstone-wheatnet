@@ -4,9 +4,33 @@ import {
 	CompanionInputFieldNumber,
 } from '@companion-module/base'
 
-export const umixInput = (): CompanionInputFieldNumber[] => [
-	{ type: 'number', id: 'mixer', label: 'Mixer', min: 1, max: 2, default: 1 },
-	{ type: 'number', id: 'channel', label: 'Channel', min: 1, max: 8, default: 1 },
+export const umixInput = (): CompanionInputFieldDropdown[] => [
+	{
+		type: 'dropdown',
+		id: 'mixer',
+		label: 'Mixer',
+		default: 1,
+		choices: [
+			{ id: 1, label: '1' },
+			{ id: 2, label: '2' },
+		],
+	},
+	{
+		type: 'dropdown',
+		id: 'channel',
+		label: 'Channel',
+		default: 1,
+		choices: [
+			{ id: 1, label: '1' },
+			{ id: 2, label: '2' },
+			{ id: 3, label: '3' },
+			{ id: 4, label: '4' },
+			{ id: 5, label: '5' },
+			{ id: 6, label: '6' },
+			{ id: 7, label: '7' },
+			{ id: 8, label: '8' },
+		],
+	},
 ]
 
 export const umixInputOptions = (): (CompanionInputFieldNumber | CompanionInputFieldDropdown)[] => [
@@ -23,12 +47,12 @@ export const umixInputOptions = (): (CompanionInputFieldNumber | CompanionInputF
 	},
 ]
 
-export const umixInputDbOptions = (): CompanionInputFieldNumber[] => [
+export const umixInputDbOptions = (): (CompanionInputFieldDropdown | CompanionInputFieldNumber)[] => [
 	...umixInput(),
 	{ type: 'number', id: 'db', label: 'dB', min: -80, max: 12, default: 0 },
 ]
 
-export const umixInputDeltaOptions = (): CompanionInputFieldNumber[] => [
+export const umixInputDeltaOptions = (): (CompanionInputFieldDropdown | CompanionInputFieldNumber)[] => [
 	...umixInput(),
 	{ type: 'number', id: 'delta', label: 'Δ dB', min: -80, max: 80, default: 1 },
 ]
@@ -100,8 +124,17 @@ export const umixInputRampOptions = (): (CompanionInputFieldNumber | CompanionIn
 	},
 ]
 
-export const umixOutput = (): (CompanionInputFieldNumber | CompanionInputFieldDropdown)[] => [
-	{ type: 'number', id: 'mixer', label: 'Mixer', default: 1, min: 1, max: 2 },
+export const umixOutput = (): CompanionInputFieldDropdown[] => [
+	{
+		type: 'dropdown',
+		id: 'mixer',
+		label: 'Mixer',
+		default: 1,
+		choices: [
+			{ id: 1, label: '1' },
+			{ id: 2, label: '2' },
+		],
+	},
 	{
 		type: 'dropdown',
 		id: 'bus',

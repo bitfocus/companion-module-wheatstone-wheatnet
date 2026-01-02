@@ -111,7 +111,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		this.stopHeartbeat()
 		this.heartbeatTimer = setInterval(() => {
 			void this.sendHeartbeat()
-		}, this.config.pollInterval)
+		}, this.config.heartbeatInterval * 1000)
 		this.resetHeartbeatTimeout()
 	}
 
@@ -126,14 +126,23 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		}
 	}
 
+	/* Send heartbeat message to Device
+	 * and reset heartbeat timeout timer
+	 */
 	async sendHeartbeat(): Promise<void> {
 		await this.send('<>')
 		this.resetHeartbeatTimeout()
 	}
 
+	/* Reset heartbeat timeout timer
+	 * If no heartbeat within timeout, consider connection lost
+	 */
 	resetHeartbeatTimeout(): void {
 		if (this.heartbeatTimeoutTimer) {
 			clearTimeout(this.heartbeatTimeoutTimer)
+		}
+		if (this.config.heartbeatInterval > 0) {
+			this.HEARTBEAT_TIMEOUT = this.config.heartbeatInterval * 1000
 		}
 		this.heartbeatTimeoutTimer = setTimeout(() => {
 			this.onHeartbeatTimeout()
@@ -174,6 +183,12 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 				this.log('error', 'Network error: ' + err.message)
 			})
 
+			this.socket.on('connect', () => {
+				this.log('info', 'Socket connected')
+				// Wait for welcome message?
+				void this.onConnected()
+			})
+
 			this.socket.on('data', (data: Buffer) => {
 				const message = data.toString('utf8').trim()
 				this.log('debug', `Received data: ${message}`)
@@ -197,6 +212,10 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	// DUCKA
 	// DUCKB
 	async subscribeUmix(mixer: number, channel: string, parameter: string): Promise<void> {
+		if (this.socket === undefined || !this.socket.isConnected) {
+			this.log('warn', 'Cannot subscribeUmix, socket not connected')
+			return
+		}
 		const cmd = `<UMIXSUB:${mixer}.${channel}|${parameter}:1>`
 		await this.send(cmd)
 	}
@@ -253,15 +272,17 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 			// Split only on first colon to handle escaped colons in values
 			const colonIndex = trimmedParam.indexOf(':')
 			if (colonIndex !== -1) {
-				const paramKey = trimmedParam.substring(0, colonIndex)
+				const paramKey = trimmedParam.substring(0, colonIndex).toLowerCase()
 				const paramValue = trimmedParam.substring(colonIndex + 1)
 				paramObj[paramKey] = this.unescapeValue(paramValue)
 			}
 		})
 
+		this.log('debug', `Parsed message - type: ${type}, channel: ${channel}, params: ${JSON.stringify(paramObj)}`)
 		if ((type === 'UMIXEVENT' || type === 'UMIX') && channel) {
 			this.state.umix[channel] = paramObj
-			this.checkFeedbacks('umix_on')
+			this.log('debug', `Updated UMIX state for channel ${channel}: ${JSON.stringify(this.state.umix[channel])}`)
+			this.checkFeedbacks()
 		} else if (type === 'SYS') {
 			this.log('info', 'System info: ' + JSON.stringify(paramObj))
 			// Store system info if needed
@@ -271,14 +292,18 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		}
 	}
 
-	// On successful connection after welcome message?
+	/* On successful connection after welcome message?
+	 * Start heartbeat if configured
+	 * parse SYS info (UMIX count, etc.)
+	 */
+
 	async onConnected(): Promise<void> {
 		this.updateStatus(InstanceStatus.Ok)
 		this.log('info', 'Connected to: ' + this.config.host + ':' + this.config.port)
 		await this.send('<SYS?>') // optional. get system info
 
-		if (this.config.pollInterval > 0) {
-			this.log('info', 'Starting heartbeat with interval: ' + this.config.pollInterval + ' ms')
+		if (this.config.heartbeatInterval > 0) {
+			this.log('info', 'Starting heartbeat with interval: ' + this.config.heartbeatInterval + ' s')
 			this.startHeartbeat()
 		}
 	}
