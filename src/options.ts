@@ -69,16 +69,6 @@ export const umixInputDuckOptions = (): (CompanionInputFieldNumber | CompanionIn
 			{ id: 'DUCKB', label: 'B' },
 		],
 	},
-	{
-		type: 'dropdown',
-		id: 'value',
-		label: 'Value',
-		default: 1,
-		choices: [
-			{ id: 1, label: 'On' },
-			{ id: 0, label: 'Off' },
-		],
-	},
 ]
 
 export const umixInputBalanceOptions = (): (CompanionInputFieldNumber | CompanionInputFieldDropdown)[] => [

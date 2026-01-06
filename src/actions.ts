@@ -88,7 +88,19 @@ export function UpdateActions(self: ModuleInstance): void {
 
 		umix_input_duck: {
 			name: 'UMIX Input: Duck',
-			options: umixInputDuckOptions(),
+			options: [
+				...umixInputDuckOptions(),
+				{
+					type: 'dropdown',
+					id: 'value',
+					label: 'Value',
+					default: 1,
+					choices: [
+						{ id: 1, label: 'On' },
+						{ id: 0, label: 'Off' },
+					],
+				},
+			],
 			callback: async (event) => {
 				await self.send(`<UMIX:${event.options.mixer}.${event.options.channel}|DUCKA:${event.options.value}>`)
 			},

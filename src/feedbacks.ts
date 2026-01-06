@@ -5,6 +5,12 @@ import { umixInput, umixInputDuckOptions, umixOutput, umixOutputDbOptions } from
 export function UpdateFeedbacks(self: ModuleInstance): void {
 	self.setFeedbackDefinitions({
 		/* =========================
+		 * UMIX ENABLED
+		 * to make use of the feedback, the command
+		 * <UMIX:1.0?ENABLED> must be polled
+		 * ========================= */
+
+		/* =========================
 		 * UMIX INPUT ON
 		 * ========================= */
 		umix_input_on: {
@@ -106,6 +112,44 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 		},
 
 		/* =========================
+		 * UMIX MFDR ABOVE THRESHOLD
+		 * ========================= */
+		umix_mfdr_above: {
+			type: 'boolean',
+			name: 'UMIX Mixer: Master Fader ≥ value',
+			description: 'True when Master Fader is above threshold',
+			defaultStyle: {
+				bgcolor: combineRgb(255, 100, 0),
+				color: combineRgb(0, 0, 0),
+			},
+			options: umixOutputDbOptions(),
+			subscribe: (feedback) => {
+				const mixer = Number(feedback.options.mixer)
+				const bus = String(feedback.options.bus)
+				void self.subscribeUmix(mixer, bus, 'MFDR')
+			},
+			unsubscribe: (feedback) => {
+				const mixer = Number(feedback.options.mixer)
+				const bus = String(feedback.options.bus)
+				void self.unsubscribeUmix(mixer, bus, 'MFDR')
+			},
+			callback: (feedback) => {
+				const { mixer, bus, db } = feedback.options
+				const key = `${mixer}.${bus}`
+				const value = self.state.umix[key]?.mfdr
+				self.log(
+					'debug',
+					`feedback umix_mfdr_above callback: key=${key}, db=${db}, state=${JSON.stringify(self.state.umix[key])}`,
+				)
+				// handle undefined state
+				if (db === undefined || value === undefined) {
+					return undefined as unknown as boolean
+				}
+				return value >= db
+			},
+		},
+
+		/* =========================
 		 * UMIX OUTPUT ON
 		 * ========================= */
 		umix_output_on: {
@@ -143,7 +187,7 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 		},
 
 		/* =========================
-		 * DUCKING ACTIVE
+		 * UMIX DUCKING ACTIVE
 		 * ========================= */
 		umix_input_duck: {
 			type: 'boolean',
@@ -169,50 +213,40 @@ export function UpdateFeedbacks(self: ModuleInstance): void {
 			callback: (feedback) => {
 				const { mixer, channel } = feedback.options
 				const key = `${mixer}.${channel}`
-				const output = String(feedback.options.output).toUpperCase()
+				const output = String(feedback.options.output).toLowerCase()
+				self.log(
+					'debug',
+					`feedback umix_input_duck callback: key=${key}, output=${output}, state=${JSON.stringify(self.state.umix[key])}`,
+				)
 				if (!output) {
-					return false
+					return undefined as unknown as boolean
 				}
-				return self.state.umix[key]?.[output] === 1
+				return self.state.umix[key]?.[output] === '1'
 			},
 		},
 
 		/* =========================
-		 * MFDR ABOVE THRESHOLD
-		 * ========================= */
-		umix_mfdr_above: {
-			type: 'boolean',
-			name: 'UMIX Mixer: MFDR ≥ value',
-			description: 'True when MFDR is above threshold',
-			defaultStyle: {
-				bgcolor: combineRgb(255, 100, 0),
-				color: combineRgb(0, 0, 0),
-			},
-			options: umixOutputDbOptions(),
-			subscribe: (feedback) => {
-				const mixer = Number(feedback.options.mixer)
-				const bus = String(feedback.options.bus)
-				void self.subscribeUmix(mixer, bus, 'MFDR')
-			},
-			unsubscribe: (feedback) => {
-				const mixer = Number(feedback.options.mixer)
-				const bus = String(feedback.options.bus)
-				void self.unsubscribeUmix(mixer, bus, 'MFDR')
-			},
-			callback: (feedback) => {
-				const { mixer, bus, db } = feedback.options
-				const key = `${mixer}.${bus}`
-				const value = self.state.umix[key]?.MFDR
-				if (db === undefined) {
-					return false
-				}
-				return value !== undefined && value >= db
-			},
-		},
-
-		/* =========================
-		 * ToDO:
-		 * LIO / SLIO IO PORT STATUS incl. subscribe/unsubscribe
+		 * ToDO subscribtions:
+		 * SRCSUB NAME
+		 * SRCSUB LOCATION
+		 * SRCSUB DEF
+		 * SRCSUB GAINT
+		 * SRCSUB GAIN
+		 * DSTSUB NAME
+		 * DSTSUB LOCATION
+		 * DSTSUB DEF
+		 * DSTSUB SRC
+		 * DSTSUB LOCKED
+		 * DSTSUB GAINT
+		 * DSTSUB GAIN
+		 * SALVOSUB NAME
+		 * SALVOSUB DEF
+		 * SALVOSUB FIRE
+		 * SLIOSUB LVL IO PORT STATUS
+		 * LIOSUB LVL
+		 * SURFSPARESUB LVL
+		 * TIMESUB TIME
+		 * STRINGSUB VAL
 		 * ========================= */
 	})
 }
