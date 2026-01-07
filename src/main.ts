@@ -246,12 +246,16 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	// <UMIXEVENT:1.2|ON:1>  (Utility Mixer 1 Input 2 is turned on)
 	// <UMIXEVENT:1.2|ON:0>  (Utility Mixer 1 Input 2 is turned off)
 	// <SRC:00400002|NAME:mic/:Bob> (Source name contains escaped colon)
-	// <SYS|NAME:Blade03,BLID:3,MODEL:IP88a,VERSION:1.6.5,...> (System info)
+	// <SYS|NAME:Blade03,BLID:3,MODEL:IP88a,VERSION:1.6.5,AUTO:1.8,UPTIME:0010D23H59M10S,TEMP:28.50,UMIX:2,SLIO:64,IFID:192.168.87.103,SUBRATE:10.100> (System info)
 	// Handles escaping: | -> /| , : -> /: , ? -> /? , < -> /< , > -> />
 	handleMessage(msg: string): void {
 		// remove < >
 		msg = msg.replace(/<|>/g, '')
-
+		// ignore OK or empty messages
+		if (msg === 'OK' || msg === '') {
+			// ignore
+			return
+		}
 		// split target + params
 		// goal: target = "UMIXEVENT:1.2", paramString = "ON:1,FDRA:-80.0,..."
 		// or target = "SYS", paramString = "NAME:Blade03,BLID:3,..."
@@ -288,10 +292,23 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 			if (this.config.debugLogging) {
 				this.log('debug', `Updated UMIX state for channel ${channel}: ${JSON.stringify(this.state.umix[channel])}`)
 			}
+			// Update variables and feedbacks
+			const updates: Record<string, string | number> = {}
+			for (const [paramKey, paramValue] of Object.entries(paramObj)) {
+				const varKey = `umix_${channel}_${paramKey.toLowerCase()}`
+				updates[varKey] = paramValue
+			}
+			this.setVariableValues(updates)
 			this.checkFeedbacks()
 		} else if (type === 'SYS') {
 			this.log('info', 'System info: ' + JSON.stringify(paramObj))
-			// Store system info if needed
+			// Store system info as variables
+			const updates: Record<string, string | number> = {}
+			for (const [paramKey, paramValue] of Object.entries(paramObj)) {
+				const varKey = `system_${paramKey.toLowerCase()}`
+				updates[varKey] = paramValue
+			}
+			this.setVariableValues(updates)
 		} else {
 			this.log('warn', 'Unknown message type: ' + type)
 			this.log('warn', 'Message content: ' + JSON.stringify(paramObj))
