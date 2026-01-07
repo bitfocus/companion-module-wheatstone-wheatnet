@@ -1,7 +1,7 @@
 import type { ModuleInstance } from './main.js'
 import {
 	umixInputOptions,
-	umixInputDbOptions,
+	umixInputFaderOptions as umixInputFaderOptions,
 	umixInputDeltaOptions,
 	umixInputDuckOptions,
 	umixInputBalanceOptions,
@@ -29,6 +29,7 @@ export function UpdateActions(self: ModuleInstance): void {
 			],
 			callback: async (event) => {
 				await self.send(`<SYS|IFID:${event.options.ifid}>`)
+				// self.setVariableValues({ ifid: event.options.ifid })
 			},
 		},
 
@@ -54,55 +55,45 @@ export function UpdateActions(self: ModuleInstance): void {
 			},
 		},
 
-		umix_input_fdra: {
-			name: 'UMIX Input: Set FDRA',
-			options: umixInputDbOptions(),
+		umix_input_fader: {
+			name: 'UMIX Input: Set Fader Output',
+			options: umixInputFaderOptions(),
 			callback: async (event) => {
-				await self.send(`<UMIX:${event.options.mixer}.${event.options.channel}|FDRA:${event.options.db}>`)
+				await self.send(
+					`<UMIX:${event.options.mixer}.${event.options.channel}|${event.options.output}:${event.options.db}>`,
+				)
 			},
 		},
 
-		umix_input_fdrb: {
-			name: 'UMIX Input: Set FDRB',
-			options: umixInputDbOptions(),
-			callback: async (event) => {
-				await self.send(`<UMIX:${event.options.mixer}.${event.options.channel}|FDRB:${event.options.db}>`)
-			},
-		},
-
-		umix_input_inca: {
-			name: 'UMIX Input: Increment FDRA',
-			options: umixInputDeltaOptions(),
-			callback: async (event) => {
-				await self.send(`<UMIX:${event.options.mixer}.${event.options.channel}|INCA:${event.options.delta}>`)
-			},
-		},
-
-		umix_input_incb: {
-			name: 'UMIX Input: Increment FDRB',
-			options: umixInputDeltaOptions(),
-			callback: async (event) => {
-				await self.send(`<UMIX:${event.options.mixer}.${event.options.channel}|INCB:${event.options.delta}>`)
-			},
-		},
-
-		umix_input_duck: {
-			name: 'UMIX Input: Duck',
+		umix_input_fader_mov: {
+			name: 'UMIX Input: Move Fader Output',
 			options: [
-				...umixInputDuckOptions(),
+				...umixInputDeltaOptions(),
 				{
 					type: 'dropdown',
-					id: 'value',
-					label: 'Value',
-					default: 1,
+					id: 'output',
+					label: 'Output',
+					default: 'INCA',
 					choices: [
-						{ id: 1, label: 'On' },
-						{ id: 0, label: 'Off' },
+						{ id: 'INCA', label: 'A' },
+						{ id: 'INCB', label: 'B' },
 					],
 				},
 			],
 			callback: async (event) => {
-				await self.send(`<UMIX:${event.options.mixer}.${event.options.channel}|DUCKA:${event.options.value}>`)
+				await self.send(
+					`<UMIX:${event.options.mixer}.${event.options.channel}|${event.options.output}:${event.options.delta}>`,
+				)
+			},
+		},
+
+		umix_input_ramp: {
+			name: 'UMIX Input: Ramp',
+			options: umixInputRampOptions(),
+			callback: async (event) => {
+				await self.send(
+					`<UMIX:${event.options.mixer}.${event.options.channel}|${event.options.type}:${event.options.speed}>`,
+				)
 			},
 		},
 
@@ -116,12 +107,24 @@ export function UpdateActions(self: ModuleInstance): void {
 			},
 		},
 
-		umix_input_ramp: {
-			name: 'UMIX Input: Ramp',
-			options: umixInputRampOptions(),
+		umix_input_duck: {
+			name: 'UMIX Input: Duck',
+			options: [
+				...umixInputDuckOptions(),
+				{
+					type: 'dropdown',
+					id: 'state',
+					label: 'State',
+					default: 1,
+					choices: [
+						{ id: 1, label: 'On' },
+						{ id: 0, label: 'Off' },
+					],
+				},
+			],
 			callback: async (event) => {
 				await self.send(
-					`<UMIX:${event.options.mixer}.${event.options.channel}|${event.options.type}:${event.options.speed}>`,
+					`<UMIX:${event.options.mixer}.${event.options.channel}|${event.options.output}:${event.options.state}>`,
 				)
 			},
 		},
@@ -137,7 +140,7 @@ export function UpdateActions(self: ModuleInstance): void {
 			},
 		},
 
-		umix_output_mfdr: {
+		umix_output_fader: {
 			name: 'UMIX Output: Set Master Fader',
 			options: umixOutputDbOptions(),
 			callback: async (event) => {
@@ -145,17 +148,41 @@ export function UpdateActions(self: ModuleInstance): void {
 			},
 		},
 
-		umix_output_minc: {
-			name: 'UMIX Output: Increment Master Fader',
+		umix_output_fader_mov: {
+			name: 'UMIX Output: Move Master Fader',
 			options: umixOutputDeltaOptions(),
 			callback: async (event) => {
 				await self.send(`<UMIX:${event.options.mixer}.${event.options.bus}|MINC:${event.options.delta}>`)
 			},
 		},
 
+		umix_mixer_duck_level: {
+			name: 'UMIX Mixer: Ducking Level',
+			options: [
+				{
+					type: 'dropdown',
+					id: 'mixer',
+					label: 'Mixer',
+					default: 1,
+					choices: [
+						{ id: 1, label: 'Mixer 1' },
+						{ id: 2, label: 'Mixer 2' },
+					],
+				},
+				{ type: 'number', id: 'delta', label: 'Delta (dB)', min: -80, max: 0, default: -12 },
+			],
+			callback: async (event) => {
+				await self.send(`<UMIX:${event.options.mixer}.0|DUCKLVL:${event.options.delta}>`)
+			},
+		},
+
 		/* =========================
 		 * DST
+		 * only examples, not implemented, since ID numbers are not clear
+		 * if needed, we would have to use SRCSUB "<SRCSUB:*.*.*.*|DEF:1,NAME:1>"
+		 * and DSTSUB "<DSTSUB:*.*.*.*|DEF:1,NAME:1>" to subscribe to source/destination changes
 		 * ========================= */
+		/*
 		dst_set_src: {
 			name: 'DST: Set Source',
 			options: [
@@ -194,7 +221,7 @@ export function UpdateActions(self: ModuleInstance): void {
 				await self.send(`<DST:${event.options.dst}|LOCKED:${event.options.value}>`)
 			},
 		},
-
+*/
 		/* =========================
 		 * SALVO
 		 * ========================= */
@@ -209,11 +236,12 @@ export function UpdateActions(self: ModuleInstance): void {
 		/* =========================
 		 * IO
 		 * ========================= */
+		//  Use the <SYS?SLIO> query to determine how many software LIO pins are available on the Blade.
 		slio_set: {
 			name: 'SLIO: Set Level',
 			options: ioOptions(),
 			callback: async (event) => {
-				await self.send(`<SLIO:${event.options.index}|LVL:${event.options.value}>`)
+				await self.send(`<SLIO:${event.options.index}|LVL:${event.options.level}>`)
 			},
 		},
 
@@ -222,16 +250,18 @@ export function UpdateActions(self: ModuleInstance): void {
 			name: 'LIO: Set Level',
 			options: ioOptions(),
 			callback: async (event) => {
-				await self.send(`<LIO:${event.options.index}|LVL:${event.options.value}>`)
+				await self.send(`<LIO:${event.options.index}|LVL:${event.options.level}>`)
 			},
 		},
 
 		/* =========================
 		 * MIC
+		 * only examples, not implemented, since ID mapping is not clear
 		 * Channel: Source ID in either Hexadecimal or dotted notation
 		 * <MIC:06000C00|PPWR:1>
 		 * <MIC:24.0.6.0?PPWR>
 		 * ========================= */
+		/*
 		mic_ppwr: {
 			name: 'MIC: Phantom Power',
 			options: [
@@ -251,5 +281,6 @@ export function UpdateActions(self: ModuleInstance): void {
 				await self.send(`<MIC:${event.options.mic}|PPWR:${event.options.value}>`)
 			},
 		},
+		*/
 	})
 }

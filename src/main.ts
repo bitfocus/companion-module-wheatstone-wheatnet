@@ -12,25 +12,6 @@ import { UpdateActions } from './actions.js'
 import { UpdateFeedbacks } from './feedbacks.js'
 
 interface UmixState {
-	/*
-	on?: number
-	fdra?: number
-	fdrb?: number
-	mfdr?: number
-	ducklvl?: number
-	ducka?: number
-	duckb?: number
-	bala?: number
-	balb?: number
-	urampb?: number
-	drampb?: number
-	urampa?: number
-	drampa?: number
-	enabled?: number
-	*/
-	//minc?: number
-	//inca?: number
-	//incb?: number
 	[key: string]: string | number | undefined
 }
 
@@ -47,6 +28,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	constructor(internal: unknown) {
 		super(internal)
 	}
+	private umixSubscriptions = new Set<string>()
 
 	// Heartbeat properties
 	heartbeatTimer: NodeJS.Timeout | null = null
@@ -60,7 +42,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		// Initialize state
 		this.state.umix = {}
 
-		this.updateStatus(InstanceStatus.Ok)
+		//this.updateStatus(InstanceStatus.Ok)
 
 		this.updateActions() // export actions
 		this.updateFeedbacks() // export feedbacks
@@ -68,7 +50,9 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	}
 	// When module gets deleted
 	async destroy(): Promise<void> {
-		this.log('debug', 'destroy')
+		if (this.config.debugLogging) {
+			this.log('debug', 'destroy')
+		}
 		this.stopHeartbeat()
 		if (this.socket) {
 			this.socket.destroy()
@@ -191,7 +175,9 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 
 			this.socket.on('data', (data: Buffer) => {
 				const message = data.toString('utf8').trim()
-				this.log('debug', `Received data: ${message}`)
+				if (this.config.debugLogging) {
+					this.log('debug', `Received data: ${message}`)
+				}
 				// Heartbeat: If we get any data
 				this.lastHeartbeat = Date.now()
 				if (this.heartbeatTimeoutTimer) {
@@ -212,26 +198,42 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	// DUCKA
 	// DUCKB
 	async subscribeUmix(mixer: number, channel: string, parameter: string): Promise<void> {
-		if (this.socket === undefined || !this.socket.isConnected) {
-			this.log('warn', 'Cannot subscribeUmix, socket not connected')
+		const key = `${mixer}.${channel}.${parameter}`
+
+		if (!this.socket?.isConnected) {
+			this.umixSubscriptions.add(key)
+			if (this.config.debugLogging) {
+				this.log('debug', `Queued UMIX subscribe ${key} since socket not connected`)
+			}
 			return
 		}
-		const cmd = `<UMIXSUB:${mixer}.${channel}|${parameter}:1>`
-		await this.send(cmd)
+
+		await this.send(`<UMIXSUB:${mixer}.${channel}|${parameter}:1>`)
 	}
 
 	// Unsubscribe from UMiX parameter updates
 	// Send <UMIXSUB:1.2|ON:0>
 	// Response <OK>
 	async unsubscribeUmix(mixer: number, channel: string, parameter: string): Promise<void> {
-		const cmd = `<UMIXSUB:${mixer}.${channel}|${parameter}:0>`
-		await this.send(cmd)
+		const key = `${mixer}.${channel}.${parameter}`
+
+		if (!this.socket?.isConnected) {
+			this.umixSubscriptions.delete(key)
+			if (this.config.debugLogging) {
+				this.log('debug', `Removed queued UMIX subscribe ${key} since socket not connected`)
+			}
+			return
+		}
+
+		await this.send(`<UMIXSUB:${mixer}.${channel}|${parameter}:0>`)
 	}
 
 	// Send command to Device
 	async send(cmd: string): Promise<void> {
 		const sendBuf = Buffer.from(cmd + '\r\n', 'latin1')
-		this.log('info', 'sending to ' + this.config.host + ': ' + sendBuf.toString())
+		if (this.config.debugLogging) {
+			this.log('debug', 'sending to ' + this.config.host + ': ' + sendBuf.toString())
+		}
 
 		if (this.socket !== undefined && this.socket.isConnected) {
 			await this.socket.send(sendBuf)
@@ -278,10 +280,14 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 			}
 		})
 
-		this.log('debug', `Parsed message - type: ${type}, channel: ${channel}, params: ${JSON.stringify(paramObj)}`)
+		if (this.config.debugLogging) {
+			this.log('debug', `Parsed message - type: ${type}, channel: ${channel}, params: ${JSON.stringify(paramObj)}`)
+		}
 		if ((type === 'UMIXEVENT' || type === 'UMIX') && channel) {
 			this.state.umix[channel] = paramObj
-			this.log('debug', `Updated UMIX state for channel ${channel}: ${JSON.stringify(this.state.umix[channel])}`)
+			if (this.config.debugLogging) {
+				this.log('debug', `Updated UMIX state for channel ${channel}: ${JSON.stringify(this.state.umix[channel])}`)
+			}
 			this.checkFeedbacks()
 		} else if (type === 'SYS') {
 			this.log('info', 'System info: ' + JSON.stringify(paramObj))
@@ -298,7 +304,6 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 	 */
 
 	async onConnected(): Promise<void> {
-		this.updateStatus(InstanceStatus.Ok)
 		this.log('info', 'Connected to: ' + this.config.host + ':' + this.config.port)
 		await this.send('<SYS?>') // optional. get system info
 
@@ -306,6 +311,14 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 			this.log('info', 'Starting heartbeat with interval: ' + this.config.heartbeatInterval + ' s')
 			this.startHeartbeat()
 		}
+		this.updateStatus(InstanceStatus.Ok)
+
+		// Process queued UMIX subscriptions
+		for (const sub of this.umixSubscriptions) {
+			const [mixer, channel, parameter] = sub.split('.')
+			await this.subscribeUmix(parseInt(mixer), channel, parameter)
+		}
+		this.umixSubscriptions.clear()
 	}
 
 	// Escaping/Unescaping helper methods

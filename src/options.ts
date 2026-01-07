@@ -47,8 +47,18 @@ export const umixInputOptions = (): (CompanionInputFieldNumber | CompanionInputF
 	},
 ]
 
-export const umixInputDbOptions = (): (CompanionInputFieldDropdown | CompanionInputFieldNumber)[] => [
+export const umixInputFaderOptions = (): (CompanionInputFieldDropdown | CompanionInputFieldNumber)[] => [
 	...umixInput(),
+	{
+		type: 'dropdown',
+		id: 'output',
+		label: 'Output',
+		default: 'FDRA',
+		choices: [
+			{ id: 'FDRA', label: 'A' },
+			{ id: 'FDRB', label: 'B' },
+		],
+	},
 	{ type: 'number', id: 'db', label: 'dB', min: -80, max: 12, default: 0 },
 ]
 
@@ -166,11 +176,11 @@ export const ioOptions = (): (CompanionInputFieldTextInput | CompanionInputField
 		type: 'textinput',
 		id: 'index',
 		label: 'Index',
-		tooltip: 'Index on card 0 or CARD.CIRCUIT ie. 49.0 for card 49 circuit 0',
+		tooltip: 'Software LIO Index / LIO Index on card 0 or CARD.CIRCUIT ie. 49.0 for card 49 circuit 0',
 	},
 	{
 		type: 'dropdown',
-		id: 'value',
+		id: 'level',
 		label: 'Level',
 		default: 1,
 		choices: [
