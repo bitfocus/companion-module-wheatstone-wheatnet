@@ -282,5 +282,19 @@ export function UpdateActions(self: ModuleInstance): void {
 			},
 		},
 		*/
+		custom_cmd: {
+			name: 'Custom Command',
+			options: [
+				{
+					type: 'textinput',
+					id: 'cmd',
+					label: 'Command',
+					default: '<SYS?>',
+				},
+			],
+			callback: async (event) => {
+				await self.send(`${event.options.cmd}`)
+			},
+		},
 	})
 }

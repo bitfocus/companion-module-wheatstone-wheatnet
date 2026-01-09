@@ -174,16 +174,21 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 			})
 
 			this.socket.on('data', (data: Buffer) => {
-				const message = data.toString('utf8').trim()
-				if (this.config.debugLogging) {
-					this.log('debug', `Received data: ${message}`)
+				// Accumulate data in buffer
+				this.socketBuffer += data.toString('utf8')
+
+				let idx: number
+				while ((idx = this.socketBuffer.indexOf('\r\n')) !== -1) {
+					const line = this.socketBuffer.slice(0, idx)
+					this.socketBuffer = this.socketBuffer.slice(idx + 2)
+
+					if (line.length > 0) {
+						if (this.config.debugLogging) {
+							this.log('debug', `Received line: ${line}`)
+						}
+						this.handleMessage(line)
+					}
 				}
-				// Heartbeat: If we get any data
-				this.lastHeartbeat = Date.now()
-				if (this.heartbeatTimeoutTimer) {
-					this.resetHeartbeatTimeout()
-				}
-				this.handleMessage(message)
 			})
 		}
 	}
@@ -237,6 +242,11 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 
 		if (this.socket !== undefined && this.socket.isConnected) {
 			await this.socket.send(sendBuf)
+			// Heartbeat reset
+			this.lastHeartbeat = Date.now()
+			if (this.heartbeatTimeoutTimer) {
+				this.resetHeartbeatTimeout()
+			}
 		} else {
 			this.log('info', 'Socket not connected :(')
 		}
