@@ -5,8 +5,8 @@
 	"description": "communicate with Wheatstone I/O Blades using TCP connection.",
 	"version": "0.0.0",
 	"license": "MIT",
-	"repository": "git+https://github.com/h07d0q/companion-module-wheatstone-wheatnet.git",
-	"bugs": "https://github.com/h07d0q/companion-module-wheatstone-wheatnet/issues",
+	"repository": "git+https://github.com/bitfocus/companion-module-wheatstone-wheatnet.git",
+	"bugs": "https://github.com/bitfocus/companion-module-wheatstone-wheatnet/issues",
 	"maintainers": [
 		{
 			"name": "Eugen",

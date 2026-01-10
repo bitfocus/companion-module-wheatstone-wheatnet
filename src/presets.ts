@@ -1,8 +1,8 @@
 import type { ModuleInstance } from './main.js'
-import { combineRgb } from '@companion-module/base'
+import { CompanionPresetDefinitions, combineRgb } from '@companion-module/base'
 
 export function UpdatePresets(self: ModuleInstance): void {
-	const presets: any = {}
+	const presets: CompanionPresetDefinitions = {}
 
 	for (let mixer = 1; mixer <= 2; mixer++) {
 		/* Inputs */
@@ -17,6 +17,7 @@ export function UpdatePresets(self: ModuleInstance): void {
 					text: `Input ${channel}\nMix ${mixer}\nON`,
 					color: combineRgb(255, 255, 255),
 					bgcolor: combineRgb(60, 60, 60),
+					size: 'auto',
 				},
 				steps: [
 					{
@@ -56,6 +57,7 @@ export function UpdatePresets(self: ModuleInstance): void {
 					text: `Input ${channel}\nMix ${mixer}\nOFF`,
 					color: combineRgb(255, 255, 255),
 					bgcolor: combineRgb(60, 60, 60),
+					size: 'auto',
 				},
 				steps: [
 					{
@@ -96,6 +98,7 @@ export function UpdatePresets(self: ModuleInstance): void {
 					text: `Input ${channel}\nMix ${mixer}`,
 					color: combineRgb(255, 255, 255),
 					bgcolor: combineRgb(60, 60, 60),
+					size: 'auto',
 				},
 				steps: [
 					{
@@ -158,12 +161,12 @@ export function UpdatePresets(self: ModuleInstance): void {
 					text: `Out ${bus}\nMix ${mixer} ON`,
 					color: combineRgb(255, 255, 255),
 					bgcolor: combineRgb(60, 60, 60),
+					size: 'auto',
 				},
 				steps: [
 					{
 						down: [
 							{
-								type: 'action',
 								actionId: 'umix_output',
 								options: {
 									mixer: mixer,
@@ -198,12 +201,12 @@ export function UpdatePresets(self: ModuleInstance): void {
 					text: `Out ${bus}\nMix ${mixer} OFF`,
 					color: combineRgb(255, 255, 255),
 					bgcolor: combineRgb(60, 60, 60),
+					size: 'auto',
 				},
 				steps: [
 					{
 						down: [
 							{
-								type: 'action',
 								actionId: 'umix_output',
 								options: {
 									mixer: mixer,
@@ -239,12 +242,12 @@ export function UpdatePresets(self: ModuleInstance): void {
 					text: `Out ${bus}\nMix ${mixer}`,
 					color: combineRgb(255, 255, 255),
 					bgcolor: combineRgb(60, 60, 60),
+					size: 'auto',
 				},
 				steps: [
 					{
 						down: [
 							{
-								type: 'action',
 								actionId: 'umix_output',
 								options: {
 									mixer: mixer,
