@@ -1,4 +1,4 @@
-## [Wheatstone WheatNet IP]
+## Wheatstone WheatNet IP
 
 Communicate with Wheatstone I/O Blades using TCP connection.
 
@@ -18,13 +18,13 @@ connections on port 55776. All remote computers will make a TCP connection to th
 
 **Actions**
 
-- LIO: Set Level
-- SALVO: Fire
-- SLIO: Set Level
 - System: Set IFID, Set Subscription Rate
 - UMIX Mixer: Ducking Level
 - UMIX Input: ON/OFF, Balance, Duck, Ramp, Set Fader Output, Increment/Decrement Fader Output
 - UMIX Output: ON/OFF, Set Master Fader, Increment/Decrement Master Fader
+- LIO: Set Level
+- SLIO: Set Level
+- SALVO: Fire
 
 **Feedbacks**
 
@@ -33,10 +33,13 @@ connections on port 55776. All remote computers will make a TCP connection to th
 - UMIX Output: ON
 
 **Variables**
+
 All System and UMIX Parameters.
 System Variables are read only at connect, thus not updated.
 UMIX Variables get populated via subscriptions coming from feedbacks.
 -> If needed, this can be changed to read one or both at heartbeat timer. Let me know.
+
+**Presets**
 
 ### Limitations
 

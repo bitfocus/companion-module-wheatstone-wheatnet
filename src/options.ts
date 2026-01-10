@@ -43,6 +43,7 @@ export const umixInputOptions = (): (CompanionInputFieldNumber | CompanionInputF
 		choices: [
 			{ id: 1, label: 'On' },
 			{ id: 0, label: 'Off' },
+			{ id: 2, label: 'Toggle' },
 		],
 	},
 ]
@@ -157,6 +158,7 @@ export const umixOutputOptions = (): (CompanionInputFieldNumber | CompanionInput
 		choices: [
 			{ id: 1, label: 'On' },
 			{ id: 0, label: 'Off' },
+			{ id: 2, label: 'Toggle' },
 		],
 	},
 ]

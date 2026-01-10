@@ -10,6 +10,7 @@ import { UpdateVariableDefinitions } from './variables.js'
 import { UpgradeScripts } from './upgrades.js'
 import { UpdateActions } from './actions.js'
 import { UpdateFeedbacks } from './feedbacks.js'
+import { UpdatePresets } from './presets.js'
 
 interface UmixState {
 	[key: string]: string | number | undefined
@@ -47,6 +48,7 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 		this.updateActions() // export actions
 		this.updateFeedbacks() // export feedbacks
 		this.updateVariableDefinitions() // export variable definitions
+		this.updatePresets() // export presets
 	}
 	// When module gets deleted
 	async destroy(): Promise<void> {
@@ -87,6 +89,10 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 
 	updateVariableDefinitions(): void {
 		UpdateVariableDefinitions(this)
+	}
+
+	updatePresets(): void {
+		UpdatePresets(this)
 	}
 
 	// Heartbeat methods
@@ -178,13 +184,13 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 				this.socketBuffer += data.toString('utf8')
 
 				let idx: number
-				while ((idx = this.socketBuffer.indexOf('\r\n')) !== -1) {
-					const line = this.socketBuffer.slice(0, idx)
-					this.socketBuffer = this.socketBuffer.slice(idx + 2)
+				while ((idx = this.socketBuffer.indexOf('>')) !== -1) {
+					const line = this.socketBuffer.slice(0, idx + 1)
+					this.socketBuffer = this.socketBuffer.slice(idx + 1)
 
 					if (line.length > 0) {
 						if (this.config.debugLogging) {
-							this.log('debug', `Received line: ${line}`)
+							this.log('debug', `Received response: ${line}`)
 						}
 						this.handleMessage(line)
 					}

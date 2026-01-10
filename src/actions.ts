@@ -47,11 +47,37 @@ export function UpdateActions(self: ModuleInstance): void {
 		/* =========================
 		 * UMIX – INPUT CHANNEL
 		 * ========================= */
-		umix_input_on: {
-			name: 'UMIX Input: ON/OFF',
+		umix_input: {
+			name: 'UMIX Input: ON/OFF/Toggle',
+			description: 'Set input ON, OFF or TOGGLE. For Toggle, make sure feedback is set up for this input.',
 			options: umixInputOptions(),
 			callback: async (event) => {
-				await self.send(`<UMIX:${event.options.mixer}.${event.options.channel}|ON:${event.options.value}>`)
+				if (event.options.value === 2) {
+					// Toggle
+					const result = self.getVariableValue(`umix_${event.options.mixer}.${event.options.channel}_on`)
+					if (result) {
+						const resultObj = result as unknown as { [key: string]: unknown }
+						self.log(
+							'debug',
+							`Toggle UMIX Input ${event.options.mixer}.${event.options.channel}: now is ${JSON.stringify(resultObj)}`,
+						)
+						if (resultObj[`umix_${event.options.mixer}.${event.options.channel}_on`] === 1) {
+							self.log('debug', 'Current state: ON, sending OFF')
+							await self.send(`<UMIX:${event.options.mixer}.${event.options.channel}|ON:0>`)
+						} else {
+							self.log('debug', 'Current state: OFF, sending ON')
+							await self.send(`<UMIX:${event.options.mixer}.${event.options.channel}|ON:1>`)
+						}
+					} else {
+						self.log(
+							'error',
+							`Toggle UMIX Input ${event.options.mixer}.${event.options.channel}: No state variable found! Make sure you have feedback set up for this input.`,
+						)
+					}
+				} else {
+					// On/Off
+					await self.send(`<UMIX:${event.options.mixer}.${event.options.channel}|ON:${event.options.value}>`)
+				}
 			},
 		},
 
@@ -132,11 +158,37 @@ export function UpdateActions(self: ModuleInstance): void {
 		/* =========================
 		 * UMIX – OUTPUT BUS
 		 * ========================= */
-		umix_output_on: {
-			name: 'UMIX Output: ON/OFF',
+		umix_output: {
+			name: 'UMIX Output: ON/OFF/Toggle',
 			options: umixOutputOptions(),
+			description: 'Set output ON, OFF or TOGGLE. For Toggle, make sure feedback is set up for this output.',
 			callback: async (event) => {
-				await self.send(`<UMIX:${event.options.mixer}.${event.options.bus}|ON:${event.options.value}>`)
+				if (event.options.value === 2) {
+					// Toggle
+					const result = self.getVariableValue(`umix_${event.options.mixer}.${event.options.bus}_on`)
+					if (result) {
+						const resultObj = result as unknown as { [key: string]: unknown }
+						self.log(
+							'debug',
+							`Toggle UMIX Output ${event.options.mixer}.${event.options.bus}: now is ${JSON.stringify(resultObj)}`,
+						)
+						if (resultObj[`umix_${event.options.mixer}.${event.options.bus}_on`] === 1) {
+							self.log('debug', 'Current state: ON, sending OFF')
+							await self.send(`<UMIX:${event.options.mixer}.${event.options.bus}|ON:0>`)
+						} else {
+							self.log('debug', 'Current state: OFF, sending ON')
+							await self.send(`<UMIX:${event.options.mixer}.${event.options.bus}|ON:1>`)
+						}
+					} else {
+						self.log(
+							'error',
+							`Toggle UMIX Output ${event.options.mixer}.${event.options.bus}: No state variable found! Make sure you have feedback set up for this output.`,
+						)
+					}
+				} else {
+					// On/Off
+					await self.send(`<UMIX:${event.options.mixer}.${event.options.bus}|ON:${event.options.value}>`)
+				}
 			},
 		},
 
