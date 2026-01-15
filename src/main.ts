@@ -158,7 +158,10 @@ export class ModuleInstance extends InstanceBase<ModuleConfig> {
 			this.socket = undefined as any
 			this.socketBuffer = '' // Buffer for incoming data
 		}
-
+		if (!this.config.host || !this.config.port) {
+			this.updateStatus(InstanceStatus.BadConfig, 'No host/port configured')
+			return
+		}
 		this.updateStatus(InstanceStatus.Connecting)
 
 		if (this.config.host && this.config.port) {
